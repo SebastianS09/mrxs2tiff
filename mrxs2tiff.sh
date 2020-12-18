@@ -7,7 +7,7 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
 usage() {
   cat <<EOF
-Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] [-Q] [-l] file1 [file2...]
+Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] [-Q] [-l] [-o] file1 [file2...]
 
 Script to convert mrxs (MIRAX) files used by 3DHistech scanners to pyramidal tiffs with vips
 Requires libvips, OpenSlide & bigtiff
@@ -18,6 +18,7 @@ Available options:
 -v, --verbose   Print script debug info
 -Q, --quality   Jpeg compression quality, defaults to 85
 -l, --level     Slide level to convert, defaults to 0
+-o, outputdir   defaults to .
 --> arguments   list of .mrxs files to convert, defaults to all mrxs in path in none provided
 EOF
   exit
@@ -53,6 +54,7 @@ parse_params() {
   # default values of variables set from params
   quality=85
   level=0
+  outputdir="."
   args='*.mrxs'
 
   while :; do
@@ -61,11 +63,15 @@ parse_params() {
     -v | --verbose) set -x ;;
     --no-color) NO_COLOR=1 ;;
     -Q | --quality)
-      quality="${1-}"
+      quality="${2-}"
       shift
       ;;
     -l | --level)
       level="${2-}"
+      shift
+      ;;
+    -o | --outputdir)
+      outputdir="${2-}"
       shift
       ;;
     -?*) die "Unknown option: $1" ;;
@@ -74,7 +80,7 @@ parse_params() {
     shift
   done
   args=("$@")
-  [[ ${#args[@]} -eq 0 ]] && args=$(find "$script_dir" -name "*.mrxs" -maxdepth 1)
+  [[ ${#args[@]} -eq 0 ]] && args=$( find "$script_dir" -name "*.mrxs" -maxdepth 1 )
   [[ -z ${args// } ]] && die 'No .mrxs files found in '"${script_dir}"
 
   # check required params and arguments
@@ -89,8 +95,10 @@ parse_params "$@"
 
 for file in ${args[*]-}; do
     if [[ $file == *.mrxs ]]; then
-    	msg "${BLUE}Converting ${file##*/} with jpeg compression at ${quality} to ${CYAN}${file%.mrxs}.tiff${NOFORMAT}"
-        vips tiffsave "${file}"[level="${level}",autocrop=true] "${file%.mrxs}".tiff --tile --tile-width 256 --tile-height 256 --pyramid --bigtiff --compression=jpeg --Q "${quality}" --properties --vips-progress
+    	filename="$( basename "${file%.mrxs}" )".tiff
+    	outpath=${outputdir%/}/$filename
+    	msg "${BLUE}Converting ${file##*/} with jpeg compression at ${quality} to ${CYAN}${filename}${NOFORMAT}"
+        vips tiffsave "${file}"[level="${level}",autocrop=true] "$outpath" --tile --tile-width 256 --tile-height 256 --pyramid --bigtiff --compression=jpeg --Q "${quality}" --properties --vips-progress
      else
      	msg "${ORANGE}skipping ${file##*/}: not a .mrxs file:${NOFORMAT}"
     fi
