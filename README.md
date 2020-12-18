@@ -2,7 +2,7 @@
 
 _For digital pathology_
 
-A simple bash script to convert scanned digital whole slide images in the MIRAX .mrxs implementation from 3DHistech to pyramidal tiffs using vips
+A simple bash script to convert scanned digital whole slide images in the MIRAX .mrxs implementation from 3DHistech to pyramidal tiffs using the [vips](https://github.com/libvips/libvips) image processing library
 
 Change arguments to vips such as tile size directly in script 
 
