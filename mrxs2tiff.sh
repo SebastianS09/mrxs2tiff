@@ -74,8 +74,8 @@ parse_params() {
     shift
   done
   args=("$@")
-  [[ ${#args[@]} -eq 0 ]] && args=`find $script_dir -name "*.mrxs" -maxdepth 1`
-  [[ -z ${args// } ]] && die 'No .mrxs files found in '${script_dir}
+  [[ ${#args[@]} -eq 0 ]] && args=$(find "$script_dir" -name "*.mrxs" -maxdepth 1)
+  [[ -z ${args// } ]] && die 'No .mrxs files found in '"${script_dir}"
 
   # check required params and arguments
   [[ ${#args[@]} -eq 0 ]] && die "Missing script arguments"
@@ -90,7 +90,7 @@ parse_params "$@"
 for file in ${args[*]-}; do
     if [[ $file == *.mrxs ]]; then
     	msg "${BLUE}Converting ${file##*/} with jpeg compression at ${quality} to ${CYAN}${file%.mrxs}.tiff${NOFORMAT}"
-        vips tiffsave $file[level=${level},autocrop=true] ${file%.mrxs}.tiff --tile --tile-width 256 --tile-height 256 --pyramid --bigtiff --compression=jpeg --Q ${quality} --vips-progress
+        vips tiffsave "${file}"[level="${level}",autocrop=true] "${file%.mrxs}".tiff --tile --tile-width 256 --tile-height 256 --pyramid --bigtiff --compression=jpeg --Q "${quality}" --properties --vips-progress
      else
      	msg "${ORANGE}skipping ${file##*/}: not a .mrxs file:${NOFORMAT}"
     fi
