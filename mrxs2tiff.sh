@@ -19,7 +19,7 @@ Available options:
 -Q, --quality   Jpeg compression quality, defaults to 85
 -l, --level     Slide level to convert, defaults to 0
 -o, outputdir   defaults to .
---> arguments   list of .mrxs files to convert, defaults to all mrxs in path in none provided
+--> arguments   list of .mrxs files to convert, defaults to all mrxs in path if none provided
 EOF
   exit
 }
