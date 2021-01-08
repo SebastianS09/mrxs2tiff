@@ -97,9 +97,13 @@ for file in ${args[*]-}; do
     if [[ $file == *.mrxs ]]; then
     	filename="$( basename "${file%.mrxs}" )".tiff
     	outpath=${outputdir%/}/$filename
-    	msg "${BLUE}Converting ${file##*/} with jpeg compression at ${quality} to ${CYAN}${filename}${NOFORMAT}"
+      if [[ -f "$outpath" ]]; then
+        msg "${ORANGE}skipping ${file##*/}: already exists:${NOFORMAT}"
+      else
+    	  msg "${BLUE}Converting ${file##*/} with jpeg compression at ${quality} to ${CYAN}${filename}${NOFORMAT}"
         vips tiffsave "${file}"[level="${level}",autocrop=true] "$outpath" --tile --tile-width 256 --tile-height 256 --pyramid --bigtiff --compression=jpeg --Q "${quality}" --properties --vips-progress
-     else
+      fi
+    else
      	msg "${ORANGE}skipping ${file##*/}: not a .mrxs file:${NOFORMAT}"
     fi
 done
